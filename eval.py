@@ -10,7 +10,7 @@ from datasets.data_utils import get_data_loader
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--load_path', type=str, default='./saved_models/fixmatch/model_best.pth')
+    parser.add_argument('--load_path', type=str, default='./saved_models/cifar10_40/model_best.pth')
     parser.add_argument('--use_train_model', action='store_true')
 
     '''

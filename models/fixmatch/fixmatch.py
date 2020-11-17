@@ -42,9 +42,18 @@ class FixMatch:
         # create the encoders
         # network is builded only by num_classes,
         # other configs are covered in main.py
-        
-        self.train_model = net_builder(num_classes=num_classes) 
-        self.eval_model = net_builder(num_classes=num_classes)
+
+        self.train_model = net_builder(pretrained=True)
+        self.eval_model = net_builder(pretrained=True)
+
+        # self.train_model = net_builder(num_classes=num_classes)
+        # self.eval_model = net_builder(num_classes=num_classes)
+        self.train_model.classifier = nn.Sequential(nn.Dropout(p=0.2, inplace=False),
+                                    nn.Linear(in_features=1280, out_features=num_classes, bias=True))
+        self.eval_model.classifier = nn.Sequential(nn.Dropout(p=0.2, inplace=False),
+                                    nn.Linear(in_features=1280, out_features=num_classes, bias=True))
+
+
         self.num_eval_iter = num_eval_iter
         self.t_fn = Get_Scalar(T) #temperature params function
         self.p_fn = Get_Scalar(p_cutoff) #confidence cutoff function
@@ -72,7 +81,9 @@ class FixMatch:
         """
         Momentum update of evaluation model (exponential moving average)
         """
-        for param_train, param_eval in zip(self.train_model.module.parameters(), self.eval_model.parameters()):
+#        for param_train, param_eval in zip(self.train_model.module.parameters(), self.eval_model.parameters()):
+#       수정
+        for param_train, param_eval in zip(self.train_model.parameters(), self.eval_model.parameters()):
             param_eval.copy_(param_eval * self.ema_m + param_train.detach() * (1-self.ema_m))
         
         for buffer_train, buffer_eval in zip(self.train_model.buffers(), self.eval_model.buffers()):
@@ -142,7 +153,7 @@ class FixMatch:
                 p_cutoff = self.p_fn(self.it)
 
                 sup_loss = ce_loss(logits_x_lb, y_lb, reduction='mean')
-                unsup_loss, mask = consistency_loss(logits_x_ulb_w, 
+                unsup_loss, mask = consistency_loss(logits_x_ulb_w,
                                               logits_x_ulb_s, 
                                               'ce', T, p_cutoff,
                                                use_hard_labels=args.hard_label)

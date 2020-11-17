@@ -215,9 +215,12 @@ def main_worker(gpu, ngpus_per_node, args):
     
     # START TRAINING of FixMatch
     trainer = model.train
+    import time
+    now = time.time()
     for epoch in range(args.epoch):
         trainer(args, logger=logger)
-        
+        print("consuming time:",time.time()-now)
+        now = time.time()
     if not args.multiprocessing_distributed or \
                 (args.multiprocessing_distributed and args.rank % ngpus_per_node == 0):
         model.save_model('latest_model.pth', save_path)

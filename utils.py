@@ -2,6 +2,8 @@ import os
 import time
 from torch.utils.tensorboard import SummaryWriter
 import logging
+import torch
+import torch.nn as nn
 
 def setattr_cls_from_kwargs(cls, kwargs):
     #if default values are in the cls,
@@ -24,7 +26,7 @@ def test_setattr_cls_from_kwargs():
         print(f"{key}:\t {getattr(test_cls, key)}")
         
         
-def net_builder(net_name, from_name: bool, net_conf=None):
+def net_builder(net_name, from_name: bool,net_conf=None,num_classes=10,):
     """
     return **class** of backbone network (not instance).
     Args
@@ -43,7 +45,7 @@ def net_builder(net_name, from_name: bool, net_conf=None):
                                expected: {model_name_list}  \
                                received: {net_name}")
         else:
-            return models.__dict__[net_name]
+            return models.__dict__[net_name]#(pretrained=True)
         
     else:
         if net_name == 'WideResNet':
